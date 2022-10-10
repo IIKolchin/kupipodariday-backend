@@ -63,7 +63,7 @@ export class Wish {
   @Column({
     type: 'money',
   })
-  price: string;
+  price: number;
 
   @Column({
     type: 'money',

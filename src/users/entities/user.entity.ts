@@ -16,6 +16,7 @@ import {
   IsDate,
   IsNotEmpty,
   IsDataURI,
+  IsEmail,
 } from 'class-validator';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
@@ -66,6 +67,7 @@ export class User {
     type: 'path',
     default: 'https://i.pravatar.cc/300',
   })
+  @IsString()
   @IsDataURI()
   avatar: string;
 
@@ -73,6 +75,8 @@ export class User {
     type: 'varchar',
     unique: true,
   })
+  @IsString()
+  @IsEmail()
   email: string;
 
   @Column()
@@ -84,8 +88,8 @@ export class User {
   wishes: Wish[];
 
   @Column()
-  @OneToMany(() => Offer, (offer) => offer.user)
-  offers: Offer[];
+  @OneToMany(() => Wish, (wish) => wish.user)
+  offers: Wish[];
 
   @Column()
   @OneToMany(() => Wishlist, (wishlist) => wishlist.owner)

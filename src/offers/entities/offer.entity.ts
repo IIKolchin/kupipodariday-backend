@@ -42,7 +42,7 @@ export class Offer {
   @Column({
     type: 'money',
   })
-  amount: 'string';
+  amount: number;
 
   @Column({
     type: 'boolean',
