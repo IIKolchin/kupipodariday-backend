@@ -33,8 +33,8 @@ export class Offer {
   @IsDate()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.offers)
-  user: User;
+  //   @ManyToOne(() => User, (user) => user.offers)
+  //   user: User;
 
   @ManyToOne(() => Wish, (wish) => wish.offers)
   item: Wish;

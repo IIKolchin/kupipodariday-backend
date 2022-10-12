@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 import {
   MinLength,
@@ -48,6 +49,7 @@ export class User {
   @MaxLength(30, {
     message: 'Должно быть не более 30 символов',
   })
+  //   @Unique('Dublicate name', ['name'])
   username: string;
 
   @Column({
@@ -64,7 +66,7 @@ export class User {
   about: string;
 
   @Column({
-    type: 'path',
+    type: 'varchar',
     default: 'https://i.pravatar.cc/300',
   })
   @IsString()
@@ -77,21 +79,23 @@ export class User {
   })
   @IsString()
   @IsEmail()
+  //   @Unique('Dublicate name', ['name'])
   email: string;
 
   @Column()
   @IsString()
   password: string;
 
-  @Column()
-  @OneToMany(() => Wish, (wish) => wish.owner)
+  @Column('simple-array', { nullable: true })
+  @OneToMany(() => Wish, (wish) => wish.id)
+  @JoinColumn()
   wishes: Wish[];
 
-  @Column()
-  @OneToMany(() => Wish, (wish) => wish.user)
+  @Column('simple-array', { nullable: true })
+  @OneToMany(() => Wish, (wish) => wish.id)
   offers: Wish[];
 
-  @Column()
+  @Column('simple-array', { nullable: true })
   @OneToMany(() => Wishlist, (wishlist) => wishlist.owner)
   wishlists: Wishlist[];
 }

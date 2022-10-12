@@ -27,7 +27,9 @@ export class UsersService {
     return this.userRepository.update({ id }, user);
   }
 
-  // async remove(id: number) {
-  //   return this.userRepository.delete({ id });
-  // }
+  async findByUsername(username: string) {
+    const user = await this.userRepository.findOneBy({ username });
+
+    return user;
+  }
 }

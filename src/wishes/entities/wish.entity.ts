@@ -70,7 +70,7 @@ export class Wish {
   })
   raised: string;
 
-  @ManyToOne(() => User, (user) => user.wishes)
+  @ManyToOne(() => User, (user) => user.id)
   owner: User;
 
   @Column({

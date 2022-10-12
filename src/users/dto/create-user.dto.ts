@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsDataURI,
   IsEmail,
+  IsUrl,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -20,7 +21,7 @@ export class CreateUserDto {
   about: string;
 
   @IsString()
-  @IsDataURI()
+  @IsUrl()
   avatar: string;
 
   @IsString()
