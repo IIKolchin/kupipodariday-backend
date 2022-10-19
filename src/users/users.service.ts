@@ -9,27 +9,35 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
-  async create(user: CreateUserDto): Promise<User> {
-    return this.userRepository.save(user);
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const user = await this.usersRepository.create(createUserDto);
+
+    return this.usersRepository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.find();
-  }
+  // async findAll(): Promise<User[]> {
+  //   return this.usersRepository.find();
+  // }
 
   async findOne(id: number): Promise<User> {
-    return this.userRepository.findOneBy({ id });
+    return this.usersRepository.findOneBy({ id });
   }
 
   async update(id: number, user: UpdateUserDto) {
-    return this.userRepository.update({ id }, user);
+    return this.usersRepository.update({ id }, user);
   }
 
   async findByUsername(username: string) {
-    const user = await this.userRepository.findOneBy({ username });
+    const user = await this.usersRepository.findOneBy({ username });
 
     return user;
   }
+
+  // async findByEmail(email: string) {
+  //   const user = await this.usersRepository.findOneBy({ email });
+
+  //   return user;
+  // }
 }

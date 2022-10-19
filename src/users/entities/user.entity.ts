@@ -11,7 +11,6 @@ import {
 import {
   MinLength,
   MaxLength,
-  Length,
   IsInt,
   IsString,
   IsDate,
@@ -22,6 +21,7 @@ import {
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -49,7 +49,6 @@ export class User {
   @MaxLength(30, {
     message: 'Должно быть не более 30 символов',
   })
-  //   @Unique('Dublicate name', ['name'])
   username: string;
 
   @Column({
@@ -79,16 +78,15 @@ export class User {
   })
   @IsString()
   @IsEmail()
-  //   @Unique('Dublicate name', ['name'])
   email: string;
 
   @Column()
   @IsString()
+  @Exclude()
   password: string;
 
   @Column('simple-array', { nullable: true })
   @OneToMany(() => Wish, (wish) => wish.id)
-  @JoinColumn()
   wishes: Wish[];
 
   @Column('simple-array', { nullable: true })
