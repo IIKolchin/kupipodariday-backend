@@ -80,20 +80,16 @@ export class User {
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ select: false })
   @IsString()
-  @Exclude()
   password: string;
 
-  @Column('simple-array', { nullable: true })
-  @OneToMany(() => Wish, (wish) => wish.id)
+  @OneToMany(() => Wish, (wish) => wish.owner)
   wishes: Wish[];
 
-  @Column('simple-array', { nullable: true })
-  @OneToMany(() => Wish, (wish) => wish.id)
-  offers: Wish[];
+  @OneToMany(() => Offer, (offer) => offer.user)
+  offers: Offer[];
 
-  @Column('simple-array', { nullable: true })
   @OneToMany(() => Wishlist, (wishlist) => wishlist.owner)
   wishlists: Wishlist[];
 }

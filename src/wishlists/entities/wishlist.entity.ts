@@ -8,6 +8,7 @@ import {
   OneToMany,
   ManyToOne,
   JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import {
   MinLength,
@@ -17,6 +18,7 @@ import {
   IsDate,
   IsNotEmpty,
   IsDataURI,
+  IsUrl,
 } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
@@ -50,24 +52,23 @@ export class Wishlist {
 
   @Column({
     type: 'varchar',
+    default: '',
   })
   @IsString()
   @MinLength(1, {
     message: 'Должно быть не менее 1 символа',
   })
   @MaxLength(1024, {
-    message: 'Должно быть не более 1024 символов',
+    message: 'Должно быть не более 1500 символов',
   })
   description: string;
 
-  @Column({
-    type: 'path',
-  })
-  @IsDataURI()
+  @Column()
+  @IsUrl()
   image: string;
 
-  @OneToMany(() => Wish, (wish) => wish.wislists)
-  @JoinColumn()
+  @ManyToMany(() => Wish, (wish) => wish.wishlists)
+  @JoinTable()
   items: Wish[];
 
   @ManyToOne(() => User, (user) => user.wishlists)

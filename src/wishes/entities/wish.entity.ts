@@ -7,6 +7,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import {
   MinLength,
@@ -16,6 +17,7 @@ import {
   IsDate,
   IsNotEmpty,
   IsDataURI,
+  IsUrl,
 } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
 import { Offer } from 'src/offers/entities/offer.entity';
@@ -48,29 +50,25 @@ export class Wish {
   })
   name: string;
 
-  @Column({
-    type: 'path',
-  })
-  @IsDataURI()
+  @Column()
+  @IsUrl()
   link: string;
 
-  @Column({
-    type: 'path',
-  })
-  @IsDataURI()
+  @Column()
+  @IsUrl()
   image: string;
 
   @Column({
-    type: 'money',
+    default: 0,
   })
   price: number;
 
   @Column({
-    type: 'money',
+    default: 0,
   })
-  raised: string;
+  raised: number;
 
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.wishes)
   owner: User;
 
   @Column({
@@ -88,9 +86,9 @@ export class Wish {
   @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
 
-  @Column()
+  @Column({ default: 0 })
   copied: number;
 
-  @OneToMany(() => Wishlist, (wishlist) => wishlist.items)
-  wislists: Wishlist;
+  @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
+  wishlists: Wishlist[];
 }
