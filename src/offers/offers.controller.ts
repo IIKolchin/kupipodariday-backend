@@ -3,9 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   Req,
   UseGuards,
   BadRequestException,
@@ -13,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { OffersService } from './offers.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
-import { RequestWithUser } from 'src/types';
-import { WishesService } from 'src/wishes/wishes.service';
-import { JwtGuard } from 'src/guards/jwt.guard';
+import { RequestWithUser } from '../types';
+import { WishesService } from '../wishes/wishes.service';
+import { JwtGuard } from '../guards/jwt.guard';
 import { EmailSenderService } from '../email-sender/email-sender.service';
 
 @Controller('offers')
@@ -72,6 +70,7 @@ export class OffersController {
     if (!offers) {
       throw new NotFoundException('Заявки не найдены');
     }
+    return offers;
   }
 
   @UseGuards(JwtGuard)
@@ -81,5 +80,6 @@ export class OffersController {
     if (!offer) {
       throw new NotFoundException('Заявка не найдена');
     }
+    return offer;
   }
 }

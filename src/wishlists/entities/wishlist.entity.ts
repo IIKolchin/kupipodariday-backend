@@ -5,9 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
-  OneToMany,
   ManyToOne,
-  JoinColumn,
   JoinTable,
 } from 'typeorm';
 import {
@@ -16,12 +14,10 @@ import {
   IsInt,
   IsString,
   IsDate,
-  IsNotEmpty,
-  IsDataURI,
   IsUrl,
 } from 'class-validator';
-import { User } from 'src/users/entities/user.entity';
-import { Wish } from 'src/wishes/entities/wish.entity';
+import { User } from '../../users/entities/user.entity';
+import { Wish } from '../../wishes/entities/wish.entity';
 
 @Entity()
 export class Wishlist {

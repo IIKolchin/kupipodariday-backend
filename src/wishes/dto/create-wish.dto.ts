@@ -3,13 +3,10 @@ import {
   IsNotEmpty,
   MinLength,
   MaxLength,
-  IsDataURI,
   IsNumber,
   Min,
   IsUrl,
 } from 'class-validator';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { User } from 'src/users/entities/user.entity';
 
 export class CreateWishDto {
   @IsString()
@@ -36,6 +33,4 @@ export class CreateWishDto {
   @IsString()
   @IsNotEmpty()
   description: string;
-
-  owner: CreateUserDto;
 }

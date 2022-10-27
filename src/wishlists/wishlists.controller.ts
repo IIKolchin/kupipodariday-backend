@@ -14,8 +14,8 @@ import { WishlistsService } from './wishlists.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { RequestWithUser } from '../types/index';
-import { JwtGuard } from 'src/guards/jwt.guard';
-import { WishesService } from 'src/wishes/wishes.service';
+import { JwtGuard } from '../guards/jwt.guard';
+import { WishesService } from '../wishes/wishes.service';
 
 @Controller('wishlistlists')
 export class WishlistsController {
@@ -33,13 +33,14 @@ export class WishlistsController {
     const wishes = await this.wishesService.findWishes(
       createWishlistDto.itemsId,
     );
+    if (!wishes) {
+      throw new NotFoundException('Подарки не найдены');
+    }
     const wishList = await this.wishlistsService.create(
       createWishlistDto,
       req.user,
       wishes,
     );
-    console.log(createWishlistDto.itemsId);
-    console.log(`wishList ${wishList}`);
     return wishList;
   }
 
@@ -61,17 +62,26 @@ export class WishlistsController {
 
   @UseGuards(JwtGuard)
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateWishlistDto: UpdateWishlistDto,
     @Req() req: RequestWithUser,
   ) {
+    const wishlist = await this.wishlistsService.findOne(+id);
+    if (!wishlist[0]) {
+      throw new NotFoundException('Список подарков не найден');
+    }
     return this.wishlistsService.update(+id, updateWishlistDto, req.user);
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishlistsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const wishlist = await this.wishlistsService.findOne(+id);
+    if (!wishlist[0]) {
+      throw new NotFoundException('Список подарков не найден');
+    }
+    await this.wishlistsService.remove(+id);
+    return wishlist[0];
   }
 }

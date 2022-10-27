@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Offer } from 'src/offers/entities/offer.entity';
-import { User } from 'src/users/entities/user.entity';
 import { Repository, Any } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
+import { Wish } from './entities/wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
-import { Wish } from './entities/wish.entity';
 
 @Injectable()
 export class WishesService {
@@ -69,13 +68,6 @@ export class WishesService {
       },
     });
     return wish[0];
-  }
-
-  async findAll() {
-    const wishes = await this.wishesRepository.find({
-      relations: ['owner'],
-    });
-    return wishes;
   }
 
   async update(id: number, updateWishDto: UpdateWishDto, user: User) {

@@ -4,20 +4,11 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToMany,
   ManyToOne,
 } from 'typeorm';
-import {
-  MinLength,
-  MaxLength,
-  IsInt,
-  IsString,
-  IsDate,
-  IsNotEmpty,
-  IsDataURI,
-} from 'class-validator';
-import { User } from 'src/users/entities/user.entity';
-import { Wish } from 'src/wishes/entities/wish.entity';
+import { IsInt, IsDate } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
+import { Wish } from '../../wishes/entities/wish.entity';
 
 @Entity()
 export class Offer {

@@ -1,10 +1,8 @@
 import { PartialType } from '@nestjs/swagger';
 import {
   IsString,
-  IsNotEmpty,
   MinLength,
   MaxLength,
-  IsDataURI,
   IsEmail,
   IsUrl,
   IsOptional,

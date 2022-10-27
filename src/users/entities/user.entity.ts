@@ -5,8 +5,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  JoinColumn,
-  Unique,
 } from 'typeorm';
 import {
   MinLength,
@@ -18,10 +16,9 @@ import {
   IsDataURI,
   IsEmail,
 } from 'class-validator';
-import { Wish } from 'src/wishes/entities/wish.entity';
-import { Offer } from 'src/offers/entities/offer.entity';
-import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
-import { Exclude } from 'class-transformer';
+import { Wish } from '../../wishes/entities/wish.entity';
+import { Offer } from '../../offers/entities/offer.entity';
+import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class User {

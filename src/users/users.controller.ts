@@ -5,31 +5,21 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseGuards,
-  ForbiddenException,
   Req,
-  Res,
-  ClassSerializerInterceptor,
-  UseInterceptors,
   NotFoundException,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtGuard } from '../guards/jwt.guard';
-import { AuthService } from '../auth/auth.service';
-import { Request } from 'express';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { RequestWithUser } from 'src/types';
+import { RequestWithUser } from '../types';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Get('me')
   me(@Req() req: Request) {
@@ -50,7 +40,6 @@ export class UsersController {
     return user;
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Get('me/wishes')
   async getMyWishes(@Req() req: RequestWithUser) {
@@ -58,7 +47,6 @@ export class UsersController {
     return await this.usersService.findWishes(id);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Get('me/:username')
   async getByUserName(@Param() params: { username: string }) {
@@ -69,7 +57,6 @@ export class UsersController {
     return user;
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Patch('me')
   async update(
@@ -81,23 +68,24 @@ export class UsersController {
     }
 
     const { id } = req.user;
-    const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-    const user = await this.usersService.update(id, {
-      ...updateUserDto,
-      password: hashedPassword,
-    });
-
-    return user;
+    if (updateUserDto.password) {
+      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+      await this.usersService.update(id, {
+        ...updateUserDto,
+        password: hashedPassword,
+      });
+    } else {
+      await this.usersService.update(id, updateUserDto);
+    }
+    return this.usersService.findOne(id);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Post('find')
   async findMany(@Body() body: { query: string }) {
     return await this.usersService.findMany(body.query);
   }
 
-  @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Get(':username/wishes')
   async getUsersWishes(@Param() params: { username: string }) {

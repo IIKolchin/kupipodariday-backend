@@ -11,11 +11,11 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { JwtGuard } from '../guards/jwt.guard';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
-import { JwtGuard } from 'src/guards/jwt.guard';
-import { RequestWithUser } from 'src/types';
+import { RequestWithUser } from '../types';
 
 @Controller('wishes')
 export class WishesController {
@@ -86,7 +86,8 @@ export class WishesController {
     if (!wish) {
       throw new NotFoundException('Подарок не найден');
     }
-    return await this.wishesService.remove(+id);
+    await this.wishesService.remove(+id);
+    return wish;
   }
 
   @UseGuards(JwtGuard)
@@ -96,7 +97,6 @@ export class WishesController {
     if (!wish) {
       throw new NotFoundException('Подарок не найден');
     }
-    // const copy = wish.copied + 1;
     return this.wishesService.copy(+id, req.user);
   }
 }
