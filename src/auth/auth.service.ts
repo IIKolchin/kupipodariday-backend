@@ -15,12 +15,12 @@ export class AuthService {
 
   auth(user: User) {
     const payload = { sub: user.id };
-    return { access_token: this.jwtService.sign(payload) };
+    const secret = this.configService.get('JWT_KEY');
+    return { access_token: this.jwtService.sign(payload, { secret }) };
   }
 
   async validatePassword(username: string, password: string) {
     const user = await this.usersService.findByUsername(username);
-    console.log(user);
     const isPasswordMatching = await bcrypt.compare(password, user.password);
     if (user && isPasswordMatching) {
       return user;

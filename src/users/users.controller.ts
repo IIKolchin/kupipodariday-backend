@@ -12,6 +12,7 @@ import {
   Res,
   ClassSerializerInterceptor,
   UseInterceptors,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,10 +23,7 @@ import { Request } from 'express';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
-
-interface RequestWithUser extends Request {
-  user: User;
-}
+import { RequestWithUser } from 'src/types';
 
 @Controller('users')
 export class UsersController {
@@ -36,6 +34,19 @@ export class UsersController {
   @Get('me')
   me(@Req() req: Request) {
     const user = req.user;
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+    return user;
+  }
+
+  @UseGuards(JwtGuard)
+  @Get(':username')
+  async getByUsername(@Param() params: { username: string }) {
+    const user = await this.usersService.findUserByUsername(params.username);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
     return user;
   }
 
@@ -44,7 +55,7 @@ export class UsersController {
   @Get('me/wishes')
   async getMyWishes(@Req() req: RequestWithUser) {
     const { id } = req.user;
-    return await this.usersService.findMyWishes(id);
+    return await this.usersService.findWishes(id);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
@@ -52,6 +63,9 @@ export class UsersController {
   @Get('me/:username')
   async getByUserName(@Param() params: { username: string }) {
     const user = await this.usersService.findByUsername(params.username);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
     return user;
   }
 
@@ -62,6 +76,10 @@ export class UsersController {
     @Req() req: RequestWithUser,
     @Body() updateUserDto: UpdateUserDto,
   ) {
+    if (!req.user) {
+      throw new NotFoundException('Редактировать можно только свои данные');
+    }
+
     const { id } = req.user;
     const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
     const user = await this.usersService.update(id, {
@@ -75,15 +93,18 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Post('find')
-  async findMany(@Body() query: { query: string }) {
-    return await this.usersService.findMany(query.query);
+  async findMany(@Body() body: { query: string }) {
+    return await this.usersService.findMany(body.query);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @UseGuards(JwtGuard)
   @Get(':username/wishes')
   async getUsersWishes(@Param() params: { username: string }) {
-    console.log(params.username);
-    return await this.usersService.findUsersWishes(params.username);
+    const user = await this.usersService.findUserByUsername(params.username);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+    return await this.usersService.findWishes(user.id);
   }
 }

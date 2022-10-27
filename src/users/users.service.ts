@@ -19,20 +19,7 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User> {
-    return this.usersRepository.findOne({
-      where: {
-        id: id,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        about: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    return this.usersRepository.findOneBy({ id });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -42,8 +29,26 @@ export class UsersService {
   async findByUsername(username: string) {
     const user = await this.usersRepository.findOne({
       select: {
+        id: true,
         username: true,
         password: true,
+      },
+      where: {
+        username,
+      },
+    });
+    return user;
+  }
+
+  async findUserByUsername(username: string) {
+    const user = await this.usersRepository.findOne({
+      select: {
+        id: true,
+        username: true,
+        about: true,
+        avatar: true,
+        createdAt: true,
+        updatedAt: true,
       },
       where: {
         username: username,
@@ -63,7 +68,7 @@ export class UsersService {
     return user;
   }
 
-  async findMyWishes(id: number) {
+  async findWishes(id: number) {
     const user = await this.usersRepository.findOneBy({ id });
     const wishes = await this.usersRepository.find({
       select: ['wishes'],
@@ -88,30 +93,5 @@ export class UsersService {
     });
     const wishesArr = wishes.map((item) => item.wishes);
     return wishesArr[0];
-  }
-
-  async findUsersWishes(username: string) {
-    const wishes = await this.usersRepository.find({
-      where: {
-        username: username,
-      },
-      relations: {
-        wishes: {
-          owner: true,
-          offers: {
-            user: {
-              wishes: true,
-              offers: true,
-              wishlists: {
-                owner: true,
-                items: true,
-              },
-            },
-          },
-        },
-      },
-    });
-    console.log(`wishes ${wishes}`);
-    return wishes;
   }
 }

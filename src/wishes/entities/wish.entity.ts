@@ -39,7 +39,6 @@ export class Wish {
 
   @Column({
     type: 'varchar',
-    unique: true,
   })
   @IsString()
   @MinLength(1, {

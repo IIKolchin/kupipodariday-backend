@@ -90,24 +90,27 @@ export class WishesService {
     return await this.wishesRepository.delete(id);
   }
 
-  async copy(id: number, copied: number, user: User) {
+  async copy(id: number, user: User) {
+    const wish = await this.wishesRepository.findOneBy({ id });
+    const copy = wish.copied + 1;
+
     await this.wishesRepository.update(id, {
-      copied: copied,
+      copied: copy,
+    });
+    const copyWish = await this.wishesRepository.create({
+      name: wish.name,
+      link: wish.link,
+      image: wish.image,
+      price: wish.price,
+      description: wish.description,
       owner: user,
     });
-    const wish = await this.wishesRepository.find({
-      relations: ['owner'],
-      where: {
-        id: id,
-      },
-    });
-    return await this.wishesRepository.save(wish);
+    return await this.wishesRepository.save(copyWish);
   }
 
   async addRaise(id: number, sum: number) {
     return await this.wishesRepository.update(id, {
       raised: sum,
-      // offers: offer,
     });
   }
 }

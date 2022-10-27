@@ -8,14 +8,13 @@ import {
   Delete,
   UseGuards,
   Req,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { JwtGuard } from 'src/guards/jwt.guard';
-import { User } from 'src/users/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { RequestWithUser } from 'src/types';
 
 @Controller('wishes')
@@ -29,48 +28,75 @@ export class WishesController {
     @Body() createWishDto: CreateWishDto,
   ) {
     const wish = await this.wishesService.create(createWishDto, req.user);
+
     return wish;
   }
 
-  @UseGuards(JwtGuard)
   @Get('last')
-  findLast() {
-    return this.wishesService.findLast();
+  async findLast() {
+    const wishes = await this.wishesService.findLast();
+    if (!wishes) {
+      throw new NotFoundException('Подарки не найдены');
+    }
+    return wishes;
   }
 
-  @UseGuards(JwtGuard)
   @Get('top')
-  findTop() {
-    return this.wishesService.findTop();
+  async findTop() {
+    const wishes = await this.wishesService.findTop();
+    if (!wishes) {
+      throw new NotFoundException('Подарки не найдены');
+    }
+    return wishes;
   }
 
   @UseGuards(JwtGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishesService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const wish = await this.wishesService.findOne(+id);
+    if (!wish) {
+      throw new NotFoundException('Подарок не найден');
+    }
+    return wish;
   }
 
   @UseGuards(JwtGuard)
   @Patch(':id')
-  update(
+  async update(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
     @Body() updateWishDto: UpdateWishDto,
   ) {
+    const wish = await this.wishesService.findOne(+id);
+    if (req.user.id !== wish.owner.id) {
+      throw new BadRequestException('Редактировать можно только свои подарки');
+    }
+    if (wish.offers.length !== 0) {
+      throw new BadRequestException(
+        'Нельзя изменять стоимость подарка, когда есть желающие скинуться',
+      );
+    }
     return this.wishesService.update(+id, updateWishDto, req.user);
   }
 
   @UseGuards(JwtGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishesService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const wish = await this.wishesService.findOne(+id);
+    if (!wish) {
+      throw new NotFoundException('Подарок не найден');
+    }
+    return await this.wishesService.remove(+id);
   }
 
   @UseGuards(JwtGuard)
   @Post(':id/copy')
   async copy(@Param('id') id: string, @Req() req: RequestWithUser) {
     const wish = await this.wishesService.findOne(+id);
-    const copy = wish.copied + 1;
-    return this.wishesService.copy(+id, copy, req.user);
+    if (!wish) {
+      throw new NotFoundException('Подарок не найден');
+    }
+    // const copy = wish.copied + 1;
+    return this.wishesService.copy(+id, req.user);
   }
 }
