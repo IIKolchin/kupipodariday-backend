@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { HashProvider } from '../helpers';
 
 @Injectable()
 export class UsersService {
@@ -12,7 +13,13 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = await this.usersRepository.create(createUserDto);
+    const hashedPassword = await HashProvider.generateHash(
+      createUserDto.password,
+    );
+    const user = await this.usersRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
 
     return this.usersRepository.save(user);
   }
@@ -22,7 +29,20 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    return await this.usersRepository.update({ id }, updateUserDto);
+    if (updateUserDto.password) {
+      const hashedPassword = await HashProvider.generateHash(
+        updateUserDto.password,
+      );
+      return await this.usersRepository.update(
+        { id },
+        {
+          ...updateUserDto,
+          password: hashedPassword,
+        },
+      );
+    } else {
+      return await this.usersRepository.update({ id }, updateUserDto);
+    }
   }
 
   async findByUsername(username: string) {
@@ -54,6 +74,18 @@ export class UsersService {
       },
     });
     return user;
+  }
+
+  async validateJwt(id: number) {
+    return await this.usersRepository.find({
+      select: {
+        id: true,
+        username: true,
+      },
+      where: {
+        id,
+      },
+    });
   }
 
   async findByEmail(email: string) {

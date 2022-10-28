@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { IsInt, IsDate } from 'class-validator';
+import { IsInt, IsDate, IsBoolean } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
 
@@ -31,10 +31,12 @@ export class Offer {
   item: Wish;
 
   @Column()
+  @IsInt()
   amount: number;
 
   @Column({
     type: 'boolean',
   })
+  @IsBoolean()
   hidden: boolean;
 }

@@ -57,11 +57,13 @@ export class Wish {
   @Column({
     default: 0,
   })
+  @IsInt()
   price: number;
 
   @Column({
     default: 0,
   })
+  @IsInt()
   raised: number;
 
   @ManyToOne(() => User, (user) => user.wishes)
@@ -83,6 +85,7 @@ export class Wish {
   offers: Offer[];
 
   @Column({ default: 0 })
+  @IsInt()
   copied: number;
 
   @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)

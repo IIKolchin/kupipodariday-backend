@@ -13,13 +13,17 @@ import {
 } from '@nestjs/common';
 import { JwtGuard } from '../guards/jwt.guard';
 import { WishesService } from './wishes.service';
+import { UsersService } from '../users/users.service';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { RequestWithUser } from '../types';
 
 @Controller('wishes')
 export class WishesController {
-  constructor(private readonly wishesService: WishesService) {}
+  constructor(
+    private readonly wishesService: WishesService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @UseGuards(JwtGuard)
   @Post()
@@ -27,7 +31,8 @@ export class WishesController {
     @Req() req: RequestWithUser,
     @Body() createWishDto: CreateWishDto,
   ) {
-    const wish = await this.wishesService.create(createWishDto, req.user);
+    const user = await this.usersService.findOne(req.user.id);
+    const wish = await this.wishesService.create(createWishDto, user);
 
     return wish;
   }
@@ -67,6 +72,7 @@ export class WishesController {
     @Param('id') id: string,
     @Body() updateWishDto: UpdateWishDto,
   ) {
+    const user = await this.usersService.findOne(req.user.id);
     const wish = await this.wishesService.findOne(+id);
     if (req.user.id !== wish.owner.id) {
       throw new BadRequestException('Редактировать можно только свои подарки');
@@ -76,7 +82,7 @@ export class WishesController {
         'Нельзя изменять стоимость подарка, когда есть желающие скинуться',
       );
     }
-    return this.wishesService.update(+id, updateWishDto, req.user);
+    return this.wishesService.update(+id, updateWishDto, user);
   }
 
   @UseGuards(JwtGuard)
@@ -93,10 +99,11 @@ export class WishesController {
   @UseGuards(JwtGuard)
   @Post(':id/copy')
   async copy(@Param('id') id: string, @Req() req: RequestWithUser) {
+    const user = await this.usersService.findOne(req.user.id);
     const wish = await this.wishesService.findOne(+id);
     if (!wish) {
       throw new NotFoundException('Подарок не найден');
     }
-    return this.wishesService.copy(+id, req.user);
+    return this.wishesService.copy(+id, user);
   }
 }

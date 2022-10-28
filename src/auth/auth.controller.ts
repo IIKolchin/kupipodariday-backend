@@ -10,7 +10,6 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { LocalGuard } from '../guards/local.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import * as bcrypt from 'bcrypt';
 import { RequestWithUser } from '../types';
 
 @Controller()
@@ -30,11 +29,6 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    const user = await this.usersService.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
-    return user;
+    return await this.usersService.create(createUserDto);
   }
 }

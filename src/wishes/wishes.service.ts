@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Repository, Any } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
@@ -49,9 +49,11 @@ export class WishesService {
   }
 
   async findOne(id: number) {
-    const wish = await this.wishesRepository.find({
+    const wish = await this.wishesRepository.findOne({
       relations: {
-        owner: true,
+        owner: {
+          wishlists: true,
+        },
         offers: {
           user: {
             wishes: true,
@@ -62,12 +64,15 @@ export class WishesService {
             },
           },
         },
+        wishlists: {
+          items: true,
+        },
       },
       where: {
         id: id,
       },
     });
-    return wish[0];
+    return wish;
   }
 
   async update(id: number, updateWishDto: UpdateWishDto, user: User) {
@@ -79,6 +84,15 @@ export class WishesService {
   }
 
   async remove(id: number) {
+    const wish = await this.wishesRepository.findOne({
+      where: { id },
+      relations: ['wishlists'],
+    });
+    if (wish.wishlists.length !== 0) {
+      throw new BadRequestException(
+        'Нельзя удалить подарок, который находится в коллекции',
+      );
+    }
     return await this.wishesRepository.delete(id);
   }
 

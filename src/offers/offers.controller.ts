@@ -6,22 +6,19 @@ import {
   Param,
   Req,
   UseGuards,
-  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { OffersService } from './offers.service';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { RequestWithUser } from '../types';
-import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
-import { EmailSenderService } from '../email-sender/email-sender.service';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('offers')
 export class OffersController {
   constructor(
     private readonly offersService: OffersService,
-    private readonly wishesService: WishesService,
-    private readonly emailSenderService: EmailSenderService,
+    private readonly usersService: UsersService,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -30,37 +27,9 @@ export class OffersController {
     @Body() createOfferDto: CreateOfferDto,
     @Req() req: RequestWithUser,
   ) {
-    const wish = await this.wishesService.findOne(createOfferDto.itemId);
-    const sum = wish.raised + createOfferDto.amount;
-    if (wish.owner.id === req.user.id) {
-      throw new BadRequestException(
-        'Нельзя вносить деньги на собственные подарки',
-      );
-    }
-
-    if (sum > wish.price) {
-      throw new BadRequestException('Сумма превышает стоимость подарка');
-    }
-
-    if (wish.raised === wish.price) {
-      throw new BadRequestException('Необходимая сумма уже собрана');
-    }
-    if (sum === wish.price) {
-      const usersEmail = wish.offers.map((user) => user.user.email);
-      const emails = [...usersEmail, req.user.email].join(', ');
-      const message = `<img src=${wish.image} alt='Подарок' style='width:100%; object-fit:cover;'>
-                      <p>Добрый день! Собрана необходимая сумма на подарок: ${wish.name}</p>
-                      <p>Список почт всех, кто скилулся: ${emails}</p>`;
-      await this.emailSenderService.sendEmail(emails, message);
-    }
-
-    const offer = await this.offersService.create(
-      createOfferDto,
-      req.user,
-      wish,
-    );
-    await this.wishesService.addRaise(createOfferDto.itemId, sum);
-    return offer;
+    const { id } = req.user;
+    const user = await this.usersService.findOne(id);
+    return await this.offersService.create(createOfferDto, user);
   }
 
   @UseGuards(JwtGuard)

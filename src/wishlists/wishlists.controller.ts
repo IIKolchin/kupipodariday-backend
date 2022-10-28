@@ -16,12 +16,14 @@ import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { RequestWithUser } from '../types/index';
 import { JwtGuard } from '../guards/jwt.guard';
 import { WishesService } from '../wishes/wishes.service';
+import { UsersService } from '../users/users.service';
 
 @Controller('wishlistlists')
 export class WishlistsController {
   constructor(
     private readonly wishlistsService: WishlistsService,
     private readonly wishesService: WishesService,
+    private readonly usersService: UsersService,
   ) {}
 
   @UseGuards(JwtGuard)
@@ -30,6 +32,7 @@ export class WishlistsController {
     @Req() req: RequestWithUser,
     @Body() createWishlistDto: CreateWishlistDto,
   ) {
+    const user = await this.usersService.findOne(req.user.id);
     const wishes = await this.wishesService.findWishes(
       createWishlistDto.itemsId,
     );
@@ -38,7 +41,7 @@ export class WishlistsController {
     }
     const wishList = await this.wishlistsService.create(
       createWishlistDto,
-      req.user,
+      user,
       wishes,
     );
     return wishList;
@@ -67,11 +70,12 @@ export class WishlistsController {
     @Body() updateWishlistDto: UpdateWishlistDto,
     @Req() req: RequestWithUser,
   ) {
+    const user = await this.usersService.findOne(req.user.id);
     const wishlist = await this.wishlistsService.findOne(+id);
     if (!wishlist[0]) {
       throw new NotFoundException('Список подарков не найден');
     }
-    return this.wishlistsService.update(+id, updateWishlistDto, req.user);
+    return this.wishlistsService.update(+id, updateWishlistDto, user);
   }
 
   @UseGuards(JwtGuard)

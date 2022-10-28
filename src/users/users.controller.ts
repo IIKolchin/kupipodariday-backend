@@ -9,11 +9,9 @@ import {
   Req,
   NotFoundException,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtGuard } from '../guards/jwt.guard';
-import * as bcrypt from 'bcrypt';
 import { RequestWithUser } from '../types';
 
 @Controller('users')
@@ -22,8 +20,9 @@ export class UsersController {
 
   @UseGuards(JwtGuard)
   @Get('me')
-  me(@Req() req: Request) {
-    const user = req.user;
+  me(@Req() req: RequestWithUser) {
+    const { id } = req.user;
+    const user = this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException('Пользователь не найден');
     }
@@ -66,17 +65,8 @@ export class UsersController {
     if (!req.user) {
       throw new NotFoundException('Редактировать можно только свои данные');
     }
-
     const { id } = req.user;
-    if (updateUserDto.password) {
-      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
-      await this.usersService.update(id, {
-        ...updateUserDto,
-        password: hashedPassword,
-      });
-    } else {
-      await this.usersService.update(id, updateUserDto);
-    }
+    await this.usersService.update(id, updateUserDto);
     return this.usersService.findOne(id);
   }
 
