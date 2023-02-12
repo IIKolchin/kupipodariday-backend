@@ -1,6 +1,6 @@
 ## About
 
-The backend of the vishlist service KupiPodariDay
+The backend of the vishlist service KupiPodariDay.  
 The code for the frontend application is available [here](https://github.com/yandex-praktikum/kupipodariday-frontend)
 
 ## Technologies used
