@@ -11,9 +11,9 @@ The backend of the vishlist service KupiPodariDay
 - Passport
 - Bcrypt
 
-# Launch
+## Launch
 
 In the project folder you can run:
-### `npm i && npm start`
+## `npm i && npm start`
 
 
